@@ -1,4 +1,4 @@
-# Nothing_Porfolio_Website
+# Nothing-portfolio 
 
 A minimalist personal portfolio website inspired by **Nothing OS** aesthetics — clean UI, monochrome palette, subtle grid, and glyph-style interactions.
 This project is built to showcase my learning journey in **Quality Assurance (QA)** and **Prompt Engineering**, along with web fundamentals.
@@ -8,32 +8,51 @@ This project is built to showcase my learning journey in **Quality Assurance (QA
 ## 📁 Project Structure
 
 ```
-Nothing_Porfolio_Website/
-│
-├── index.html      # Main HTML structure
-├── style.css       # Styling (Nothing OS inspired UI)
-├── script.js       # Interactions & animations
-│
-└── img/            # Images, icons, assets
+nothing-porfolio/
+├─ index.html
+├─ assets/
+│  ├─ cover.png
+│  ├─ css/
+│  │  └─ style.css
+│  ├─ js/
+│  │  └─ script.js
+│  ├─ img/
+│  │  └─ ankit.jpg
+│  └─ favicon/
+│     └─ Fav.ico
+└─ README.md
+
 ```
 
 ---
 
 ## ✨ Features
 
-* Nothing OS–inspired minimalist design
-* Clean typography and monochrome color system
-* Responsive layout (desktop & mobile friendly)
-* Simple glyph-style interactions
-* Lightweight: **HTML + CSS + Vanilla JavaScript only**
-
+- **Dark / Light theme toggle** (CSS variables + `data-theme`)
+- **Glass + dotted background** UI
+- **Animated NAV “glyph” effect**
+- **Hero glyph system** with autoplay + click burst
+- **Responsive mobile navigation** (hamburger / expand)
+- **GitHub tracker**
+  - Fetches profile + latest repos
+  - LocalStorage cache (repos + languages)
+  - Repo cards with OpenGraph preview images
+- **Glyph Playground**
+  - Patterns: Sweep / Pulse / Chaos / Heartbeat / Stairs
+  - Auto + manual mode
+  - Speed control
+- **Contact section**
+  - Mailto button
+  - Copy email with toast
 ---
 
 ## 🛠️ Built With
 
-* HTML5
-* CSS3
-* JavaScript (Vanilla)
+- **HTML5**
+- **CSS3** (custom variables, glassmorphism, animations)
+- **JavaScript (Vanilla)**
+- **GitHub REST API**
+- **LocalStorage caching**
 
 ---
 
@@ -54,7 +73,7 @@ It also serves as a personal portfolio to demonstrate **clean design thinking an
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/ankitshrr/Nothing_Porfolio_Website.git
+   git clone https://github.com/ankitshrr/nothing-portfolli.git
    ```
 
 2. Open `index.html` in your browser
