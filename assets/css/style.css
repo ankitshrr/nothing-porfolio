@@ -1621,3 +1621,46 @@ footer {
   top: calc((var(--nav-row-h) / 2) + var(--led-nudge));
   transform: translateY(-50%);
 }
+
+.work-input{
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: var(--surface-low);
+  color: var(--text-main);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  outline: none;
+  min-width: 220px;
+}
+.work-input:focus{ border-color: var(--nothing-red); }
+
+/* === Work cards: meta row + nicer language icons === */
+.meta-row{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:10px;
+  opacity:.95;
+}
+.meta-row .chip{
+  padding:8px 10px;
+}
+.lang-item{
+  color: var(--nothing-red);
+}
+.lang-ico img{
+  /* tint devicon icons to match site accent */
+  filter: grayscale(1) sepia(1) saturate(9) hue-rotate(330deg) brightness(1.15);
+}
+.lang-ico svg{
+  color: var(--nothing-red);
+}
+
+/* Small hover polish */
+.work-card-inner{
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.work-card-inner:hover{
+  transform: translateY(-3px);
+}

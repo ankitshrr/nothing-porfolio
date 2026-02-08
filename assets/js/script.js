@@ -511,16 +511,56 @@ function renderLangChips(langs, fallbackPrimary) {
   return `<span class="lang-strip">${items}</span>`;
 }
 
+
+function loadProjectOverrides() {
+  const el = document.getElementById("projectOverrides");
+  if (!el) return {};
+  try {
+    return JSON.parse(el.textContent || "{}") || {};
+  } catch {
+    return {};
+  }
+}
+const PROJECT_OVERRIDES = loadProjectOverrides();
+
+function pickProjectTitle(repo) {
+  const ov = PROJECT_OVERRIDES?.[repo.name];
+  const t = (ov?.title || "").trim();
+  return t ? t : repo.name; // fallback to repo name
+}
+
+function pickProjectImage(repo) {
+  const ov = PROJECT_OVERRIDES?.[repo.name];
+  const img = (ov?.image || "").trim();
+  return img ? img : ogRepoImage(GH_USERNAME, repo.name); // fallback to GitHub OG
+}
+
+function pickProjectDemo(repo) {
+  const ov = PROJECT_OVERRIDES?.[repo.name];
+  const demo = (ov?.demo || "").trim();
+  return demo ? demo : (repo.homepage || "").trim();
+}
+
+function isPinned(repoName) {
+  return !!PROJECT_OVERRIDES?.[repoName]?.pinned;
+}
+
 function repoCard(repo, langs) {
-  const name = safeText(repo.name);
+  const title = safeText(pickProjectTitle(repo));
   const desc = safeText(repo.description || "");
   const stars = repo.stargazers_count ?? 0;
   const forks = repo.forks_count ?? 0;
   const updated = fmtDate(repo.updated_at);
   const url = repo.html_url;
 
-  const img = ogRepoImage(GH_USERNAME, repo.name);
+  const img = pickProjectImage(repo);
+  const fallbackImg = ogRepoImage(GH_USERNAME, repo.name);
   const langHTML = renderLangChips(langs, repo.language);
+
+  const demo = pickProjectDemo(repo);
+  const demoBtn = demo
+    ? `<a href="${safeText(demo)}" target="_blank" rel="noopener" class="btn-system btn-tiny">Live Demo</a>`
+    : "";
 
   return `
     <div class="work-card-inner" onclick="triggerGlyph(this)">
@@ -528,26 +568,32 @@ function repoCard(repo, langs) {
 
       <div class="project-img-container">
         <div class="p-glyph pg-arc"></div><div class="p-glyph pg-bar"></div><div class="p-glyph pg-dot"></div>
-        <img src="${img}" alt="${name}" loading="lazy" />
+        <img src="${img}" alt="${title}" loading="lazy"
+          onerror="this.onerror=null; this.src='${fallbackImg}';" />
       </div>
 
-      <h3 style="word-break:break-word">${name}</h3>
+      <h3 style="word-break:break-word">${title}</h3>
       ${desc ? `<p class="card-desc">${desc}</p>` : ``}
 
       <div class="lang-row">
         ${langHTML}
-        <span class="chip">UPDATED: <b>${updated}</b></span>
-        <span class="chip">★ <b>${stars}</b></span>
-        <span class="chip">FORKS: <b>${forks}</b></span>
+      </div>
+
+      <div class="meta-row" aria-label="Project meta">
+        <span class="chip" title="Last updated"><b>${updated}</b></span>
+        <span class="chip" title="Stars"><b>${stars}</b></span>
+        <span class="chip" title="Forks"><b>${forks}</b></span>
       </div>
 
       <div class="card-actions">
+        ${demoBtn}
         <a href="${url}" target="_blank" rel="noopener" class="btn-system btn-ghost btn-tiny">Open Repo</a>
         <a href="https://github.com/${GH_USERNAME}" target="_blank" rel="noopener" class="btn-system btn-ghost btn-tiny">Profile</a>
       </div>
     </div>
   `;
 }
+
 
 async function fetchGitHubLive() {
   const userUrl = `https://api.github.com/users/${GH_USERNAME}`;
@@ -562,23 +608,50 @@ async function fetchGitHubLive() {
   return { user, repos };
 }
 
+
+function applyWorkFilters(repos) {
+  const q = (document.getElementById("repoSearch")?.value || "").trim().toLowerCase();
+  const sort = document.getElementById("repoSort")?.value || "updated";
+
+  let list = (Array.isArray(repos) ? repos : []).filter((r) => !r.fork);
+
+  if (q) {
+    list = list.filter((r) => {
+      const name = (r.name || "").toLowerCase();
+      const desc = (r.description || "").toLowerCase();
+      return name.includes(q) || desc.includes(q);
+    });
+  }
+
+  if (sort === "stars") list.sort((a, b) => (b.stargazers_count || 0) - (a.stargazers_count || 0));
+  if (sort === "name") list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  if (sort === "updated") list.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+
+  // pinned first
+  list.sort((a, b) => (isPinned(b.name) ? 1 : 0) - (isPinned(a.name) ? 1 : 0));
+
+  return list.slice(0, 9);
+}
+
 function renderGitHub(user, repos) {
   ghUserEl.textContent = `@${GH_USERNAME}`;
   ghRepoCountEl.textContent = user?.public_repos ?? "--";
   ghFollowersEl.textContent = user?.followers ?? "--";
   ghStatusEl.textContent = "LIVE";
 
-  const visible = (Array.isArray(repos) ? repos : []).filter((r) => !r.fork).slice(0, 9);
+  const visible = applyWorkFilters(repos);
 
   if (!visible.length) {
+    const q = (document.getElementById("repoSearch")?.value || "").trim();
+    const title = q ? "No projects found" : "No repos found";
+    const desc = q
+      ? "No project matches your search. Try a different keyword."
+      : "Public projects will appear here automatically when repos are available.";
     ghReposEl.innerHTML = `
       <div class="work-card-inner" style="cursor:default">
         <span class="label">EMPTY</span>
-        <h3>No repos found</h3>
-        <p class="card-desc">Create a repo and push something. This section will auto-fill.</p>
-        <div class="card-actions">
-          <a href="https://github.com/new" target="_blank" rel="noopener" class="btn-system btn-ghost btn-tiny">Create Repo</a>
-        </div>
+        <h3>${title}</h3>
+        <p class="card-desc">${desc}</p>
       </div>
     `;
     return;
@@ -699,4 +772,17 @@ window.addEventListener("load", () => {
   initTypewriter();
 
   setInterval(loadGitHub, 10 * 60 * 1000);
+});
+
+
+// Work controls: search + sort (uses cached repos if available)
+document.addEventListener("DOMContentLoaded", () => {
+  ["repoSearch", "repoSort"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", () => {
+      const cache = loadRepoCache();
+      if (cache.user && Array.isArray(cache.repos)) renderGitHub(cache.user, cache.repos);
+    });
+  });
 });
