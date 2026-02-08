@@ -8,19 +8,23 @@ This project is built to showcase my learning journey in **Quality Assurance (QA
 ## 📁 Project Structure
 
 ```
-nothing-porfolio/
+nothing-portfolio/
 ├─ index.html
 ├─ assets/
-│  ├─ cover.png
 │  ├─ css/
 │  │  └─ style.css
 │  ├─ js/
 │  │  └─ script.js
 │  ├─ img/
-│  │  └─ ankit.jpg
+│  │  ├─ ankit.jpg
+│  │  └─ project/
+│  │     ├─ portfolio.png
+│  │     └─ pythonproject.png
 │  └─ favicon/
 │     └─ Fav.ico
+├─ LICENSE
 └─ README.md
+
 
 ```
 
